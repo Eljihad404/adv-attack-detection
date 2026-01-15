@@ -199,7 +199,7 @@ class PoisonDetector:
                 # self.detector.load_state_dict(state_dict)
         
         # Override with Config value (Manual Correction)
-        self.threshold = Config.DETECTION_THRESHOLD
+        self.threshold = Config.DETECTION_THRESHOLD # Enforce Config value (0.62)
         
         self.mean_error = checkpoint.get('mean_error', 0.0)
         self.std_error = checkpoint.get('std_error', 0.0)

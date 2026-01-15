@@ -108,7 +108,7 @@ def get_dataloaders(dataset_path):
         test_dataset,
         batch_size=Config.BATCH_SIZE,
         shuffle=False,
-        num_workers=2,
+        num_workers=Config.NUM_WORKERS,
         pin_memory=True
     )
     
@@ -116,7 +116,7 @@ def get_dataloaders(dataset_path):
         val_dataset,
         batch_size=Config.BATCH_SIZE,
         shuffle=False,
-        num_workers=2,
+        num_workers=Config.NUM_WORKERS,
         pin_memory=True
     )
     

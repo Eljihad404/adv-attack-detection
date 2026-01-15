@@ -1,0 +1,3 @@
+Reconstruction Error for attacked image: 0.024774
+Current Threshold: 0.600000
+Reconstruction Error for CLEAN image: 0.014223

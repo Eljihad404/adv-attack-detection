@@ -33,12 +33,13 @@ class Config:
     # -------------------------
     # Détection adversariale
     # -------------------------
-    DETECTION_THRESHOLD = 0.020  # Recalibrated on FULL dataset (Aggressive 0.020 to catch Pneumonia attacks)
+    DETECTION_THRESHOLD = 0.018  # Recalibrated based on observed error (Clean: ~0.014, Fast Attack: ~0.024)
 
     # -------------------------
     # Matériel
     # -------------------------
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    NUM_WORKERS = 0 # Set to 0 for Windows compatibility/Debugging
 
     # -------------------------
     # Reproductibilité

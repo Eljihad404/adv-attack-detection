@@ -1,272 +1,177 @@
-# 🛡️ Système de Détection d'Attaques Adversariales sur Images Médicales
+# 🛡️ Federated Adversarial Attack Detection System for Medical Imaging
 
-Projet complet d'apprentissage fédéré avec détection d'attaques adversariales (FGSM et PGD) sur des radiographies thoraciques.
+A comprehensive Federated Learning system designed to detect adversarial attacks (FGSM and PGD) on Chest X-Ray images. This project simulates a multi-hospital environment where a global model is trained securely while being protected by a dedicated Poison Autoencoder Detector.
 
-## 📋 Table des Matières
+## 📋 Table of Contents
 
-- [Architecture](#architecture)
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Structure du Projet](#structure-du-projet)
-- [Utilisation](#utilisation)
-- [Résultats](#résultats)
+- [Architecture](#-architecture)
+- [Key Features](#-key-features)
+- [Prerequisites](#-prerequisites)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Usage](#-usage)
+    - [1. Data Setup](#1-data-setup)
+    - [2. System Training](#2-system-training)
+    - [3. Running the Application](#3-running-the-application)
+- [Configuration](#%EF%B8%8F-configuration)
+- [Results](#-expected-results)
 
 ## 🏗️ Architecture
 
-Le système implémente l'architecture suivante:
+The system implements a robust pipeline ensuring data integrity before federated aggregation:
+
+```mermaid
+graph TD
+    A[Hospitals (N Datasets)] --> B[Poison Detection (Autoencoder)]
+    B -->|Clean Data| C[Federated Learning (FedAvg)]
+    B -->|Poisoned Data| D[Discarded]
+    C --> E[Global Model (EfficientNetV2)]
+    E --> F[Deployment (API + Frontend)]
+```
+
+### Components:
+1.  **Multi-Source Simulation**: Simulates N hospitals (default: 4) with independent datasets.
+2.  **Poison Detector**: A Residual Autoencoder trained on clean data to flag anomalies (high reconstruction error).
+3.  **Adversarial Attacks**: Implementation of FGSM and PGD for robustness testing.
+4.  **Federated Learning**: Uses the FedAvg algorithm to aggregate local model updates into a global EfficientNetV2-S model.
+5.  **Modern Interface**: A FastAPI backend coupled with a React/Vite frontend for real-time inference.
+
+## ✨ Key Features
+
+*   **Model**: **EfficientNetV2-S** (Pretrained) modified for binary classification (Normal vs Pneumonia).
+*   **Defense**: Unsupervised Anomaly Detection using a custom **Residual Autoencoder**.
+*   **Attacks**: Robustness tested against FGSM and PGD adversarial samples.
+*   **Privacy**: Federated Learning ensures raw patient data never leaves the local "hospital" scope.
+
+## 🔧 Prerequisites
+
+*   **OS**: Windows 10/11 (Optimized for)
+*   **Hardware**: GPU recommended (Tested on RTX 4060 8GB).
+*   **Python**: 3.8+
+*   **Node.js**: 16+ (For the frontend)
+*   **Kaggle Account**: To download the Chest X-Ray dataset.
+
+## 📁 Project Structure
 
 ```
-Hôpitaux (n datasets) → Détection d'attaques → Données propres → Apprentissage fédéré → Modèle global
-                              ↓
-                    Modèle pré-entraîné
-                              ↓
-                    Détecteur d'attaques
+project/
+├── api/
+│   └── server.py             # FastAPI Backend
+├── frontend/                 # React + Vite Web Application
+├── scripts/
+│   ├── download_data.py      # Dataset downloader
+│   ├── train_system.py       # Main full-system training script
+│   └── train_fl.py           # Federated Learning exclusive script
+├── src/
+│   ├── config.py             # Global Configuration parameters
+│   ├── model.py              # EfficientNetV2 & Autoencoder definitions
+│   ├── federated_learning.py # FL Logic (FedAvg)
+│   ├── poison_detector.py    # Detector logic
+│   └── ...
+├── requirements.txt          # Python dependencies
+└── README.md                 # Project Documentation
 ```
-
-### Composants principaux:
-
-1. **Collecte de données multi-sources**: Simulation de N hôpitaux avec leurs datasets
-2. **Détection d'attaques**: Deep Learning pour identifier FGSM et PGD
-3. **Filtrage des données**: Suppression des exemples adversariaux
-4. **Apprentissage fédéré**: FedAvg pour l'agrégation des modèles locaux
-5. **Modèle central**: Classification NORMAL vs PNEUMONIA
-
-## 🔧 Prérequis
-
-### Matériel
-- **GPU**: RTX 4060 8GB (ou supérieur)
-- **RAM**: 16GB recommandé
-- **Stockage**: 5GB minimum
-
-### Logiciels
-- Windows 10/11
-- Python 3.8+
-- CUDA 11.8+ (pour GPU)
-- Compte Kaggle (pour télécharger le dataset)
 
 ## 📥 Installation
 
-### 1. Cloner ou créer le projet
-
-Créez un dossier pour votre projet et copiez-y tous les fichiers.
-
-### 2. Créer un environnement virtuel
-
+### 1. Clone the repository
 ```bash
-python -m venv venv
-venv\Scripts\activate
+git clone <repository-url>
+cd <repository-name>
 ```
 
-### 3. Installer les dépendances
-
+### 2. Backend Setup
+Create a virtual environment and install dependencies:
 ```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Install deps
 pip install -r requirements.txt
 ```
 
-### 4. Configurer Kaggle API
-
-1. Allez sur [kaggle.com/account](https://www.kaggle.com/account)
-2. Créez un nouveau token API (bouton "Create New API Token")
-3. Placez le fichier `kaggle.json` dans: `C:\Users\<VotreNom>\.kaggle\`
-4. Assurez-vous que le fichier a les permissions appropriées
-
-### 5. Accepter les règles du dataset
-
-Allez sur [kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) et cliquez sur "Download" pour accepter les règles.
-
-## 📁 Structure du Projet
-
-```
-projet/
-├── config.py                    # Configuration globale
-├── download_data.py             # Téléchargement du dataset
-├── data_loader.py               # Chargement et préparation des données
-├── model.py                     # Architectures des modèles
-├── adversarial_attacks.py       # Implémentation FGSM et PGD
-├── poison_detector.py           # Détecteur d'attaques
-├── federated_learning.py        # Apprentissage fédéré
-├── main.py                      # Script principal
-├── inference.py                 # Inférence et visualisation
-├── requirements.txt             # Dépendances
-└── README.md                    # Ce fichier
-```
-
-## 🚀 Utilisation
-
-### Étape 1: Télécharger le dataset
-
+### 3. Frontend Setup
+Install Node.js dependencies:
 ```bash
-python download_data.py
+cd frontend
+npm install
+cd ..
 ```
 
-Cela téléchargera ~1.2GB de données depuis Kaggle.
+### 4. Kaggle Configuration
+1.  Place your `kaggle.json` API token in `C:\Users\<YourUser>\.kaggle\`.
+2.  Accept the dataset rules at [Chest X-Ray Pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia).
 
-### Étape 2: Lancer l'entraînement complet
+## 🚀 Usage
 
+### 1. Data Setup
+Download the dataset using the script:
 ```bash
-python main.py
+python scripts/download_data.py
 ```
 
-Le script exécutera automatiquement:
-1. ✅ Chargement des données
-2. ✅ Création des datasets fédérés (4 hôpitaux par défaut)
-3. ✅ Génération d'attaques adversariales (FGSM et PGD)
-4. ✅ Entraînement du détecteur d'attaques
-5. ✅ Filtrage des données empoisonnées
-6. ✅ Apprentissage fédéré (5 rounds par défaut)
-7. ✅ Évaluation finale du modèle
-
-### Étape 3: Tester l'inférence
-
+### 2. System Training
+Run the complete pipeline (Data Prep -> Detector Training -> Attack Simulation -> Federated Learning):
 ```bash
-python inference.py
+python scripts/train_system.py
 ```
+This process will:
+*   Train the **Poison Detector** (Autoencoder) on clean data.
+*   Simulate an attack on one hospital (e.g., Hospital 2).
+*   Filter poisoned data using the Detector.
+*   Train the **Global Model** using Federated Learning (15 Rounds by default).
+*   Save `poison_detector.pth` and `global_model_final.pth`.
 
-Ou utilisez le code suivant pour vos propres images:
+### 3. Running the Application
+Start the full stack application (Backend + Frontend).
 
-```python
-from inference import InferenceSystem
-
-# Créer le système
-inference = InferenceSystem()
-
-# Prédire sur une image
-result = inference.predict_single_image("chemin/vers/image.jpg")
-
-# Afficher le résultat
-print(f"Prédiction: {result['prediction']}")
-print(f"Confiance: {result['confidence']*100:.2f}%")
-print(f"Attaque détectée: {result['is_adversarial']}")
-
-# Visualiser
-inference.visualize_prediction("chemin/vers/image.jpg", result)
+**Terminal 1 (Backend):**
+```bash
+python api/server.py
 ```
+*Server runs at `http://localhost:8000`*
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend
+npm run dev
+```
+*App runs at `http://localhost:5173` (typically)*
+
+Open your browser to the frontend URL to use the interface.
 
 ## ⚙️ Configuration
 
-Modifiez `config.py` pour ajuster les paramètres:
+You can tune the system parameters in `src/config.py`:
 
 ```python
-# Paramètres du modèle
-BATCH_SIZE = 16          # Réduire si manque de mémoire GPU
-EPOCHS = 10
-LEARNING_RATE = 0.001
+# Model
+BATCH_SIZE = 32           # Adjust based on GPU VRAM
+EPOCHS = 12               
+LEARNING_RATE = 1e-4
 
-# Paramètres fédérés
-NUM_HOSPITALS = 4        # Nombre d'hôpitaux simulés
-FEDERATED_ROUNDS = 5     # Nombre de rounds fédérés
+# Federated Learning
+NUM_HOSPITALS = 4
+FEDERATED_ROUNDS = 15     # Number of aggregation rounds
 
-# Paramètres d'attaques
-EPSILON_FGSM = 0.03      # Intensité FGSM
-EPSILON_PGD = 0.03       # Intensité PGD
-PGD_ITERATIONS = 10      # Itérations PGD
+# Attacks
+EPSILON_FGSM = 0.03
+EPSILON_PGD = 0.03
 
-# Détection
-DETECTION_THRESHOLD = 0.15  # Seuil de détection
+# Detector
+DETECTION_THRESHOLD = 0.018  # Reconstruction error threshold
 ```
 
-## 📊 Résultats Attendus
+## 📊 Expected Results
 
-### Performance du modèle
-- **Accuracy baseline**: ~85-90% sur données propres
-- **Robustesse**: Détection de 70-85% des attaques adversariales
-
-### Fichiers générés
-- `poison_detector.pth`: Modèle de détection d'attaques
-- `global_model_final.pth`: Modèle fédéré final
-
-### Temps d'exécution (RTX 4060)
-- Téléchargement: ~5-10 minutes
-- Entraînement complet: ~30-45 minutes
-- Inférence: <1 seconde par image
-
-## 🔍 Détails Techniques
-
-### Attaques Adversariales
-
-**FGSM (Fast Gradient Sign Method)**
-```python
-perturbation = epsilon * sign(∇_x Loss(model(x), y))
-x_adv = x + perturbation
-```
-
-**PGD (Projected Gradient Descent)**
-```python
-for i in range(iterations):
-    x = x + alpha * sign(∇_x Loss(model(x), y))
-    x = clip(x, x_original - epsilon, x_original + epsilon)
-```
-
-### Apprentissage Fédéré
-
-**FedAvg Algorithm**
-```
-Pour chaque round:
-  1. Distribuer le modèle global aux hôpitaux
-  2. Entraîner localement sur les données de chaque hôpital
-  3. Agréger: w_global = (1/N) * Σ w_local_i
-```
-
-## 🛠️ Dépannage
-
-### Erreur de mémoire GPU
-
-Réduisez `BATCH_SIZE` dans `config.py`:
-```python
-BATCH_SIZE = 8  # ou 4
-```
-
-### Dataset non trouvé
-
-Vérifiez:
-1. Fichier `kaggle.json` dans `C:\Users\<VotreNom>\.kaggle\`
-2. Règles du dataset acceptées sur Kaggle
-3. Connexion internet stable
-
-### Erreur CUDA
-
-Installez PyTorch avec CUDA:
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-```
-
-## 📈 Améliorations Possibles
-
-1. **Modèles**: Tester ResNet50, EfficientNet
-2. **Attaques**: Ajouter C&W, DeepFool
-3. **Fédéré**: Implémenter FedProx, FedBN
-4. **Privacy**: Ajouter Differential Privacy
-5. **Datasets**: Tester sur d'autres modalités médicales
-
-## 📝 Citation
-
-Si vous utilisez ce code, veuillez citer:
-
-```bibtex
-@software{adversarial_detection_federated,
-  title={Adversarial Attack Detection in Federated Medical Imaging},
-  year={2024},
-  author={Your Name}
-}
-```
-
-## 📄 Licence
-
-Ce projet est fourni à des fins éducatives. Le dataset Chest X-Ray est soumis à sa propre licence sur Kaggle.
+*   **Global Model Accuracy**: Aiming for >85% on clean test data.
+*   **Detector Efficiency**: Should filter out >80% of adversarial samples while keeping False Positives low.
+*   **Files**: Training generates `global_model_final.pth` (~80MB) and `poison_detector.pth`.
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues! Pour contribuer:
-1. Fork le projet
-2. Créez une branche (`git checkout -b feature/amelioration`)
-3. Commit vos changements
-4. Push vers la branche
-5. Ouvrez une Pull Request
+Contributions are welcome! Please fork the repository and submit a Pull Request.
 
-## 📧 Contact
+## 📄 License
 
-Pour questions et support, ouvrez une issue sur GitHub.
-
----
-
-**Note**: Ce projet est optimisé pour RTX 4060 8GB. Pour des GPUs avec moins de mémoire, ajustez les paramètres dans `config.py`.
+Educational purpose only. Dataset subject to Kaggle's license.

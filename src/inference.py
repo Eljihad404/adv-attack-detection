@@ -83,6 +83,8 @@ class InferenceSystem:
             if results['is_adversarial']:
                 print(f"⛔ Image rejetée par le filtre de sécurité (Erreur reconstruction: {results['adversarial_confidence']:.4f})")
                 return results # ON ARRÊTE TOUT ICI
+            else:
+                 print(f"✅ Image acceptée (Erreur reconstruction: {results['adversarial_confidence']:.4f})")
         
         # 2. Si PROPRE, Faire la prédiction
         with torch.no_grad():

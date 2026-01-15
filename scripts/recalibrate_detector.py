@@ -19,7 +19,7 @@ def recalibrate():
     # 1. Setup
     device = Config.DEVICE
     batch_size = 16
-    epochs = 30 # Requested by user
+    epochs = 1 # Modified for debugging
     lr = 0.001
     
     # 2. Data Loader (ALL Clean Data)

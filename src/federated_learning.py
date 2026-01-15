@@ -105,7 +105,7 @@ class FederatedLearning:
                     dataset,
                     batch_size=Config.BATCH_SIZE,
                     shuffle=True,
-                    num_workers=2,
+                    num_workers=Config.NUM_WORKERS,
                     pin_memory=True
                 )
                 

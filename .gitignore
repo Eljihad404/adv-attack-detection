@@ -45,9 +45,9 @@ poison_samples/
 adversarial_data/
 
 # Models (Large files)
-*.pth
-*.pt
-*.onnx
+# *.pth
+# *.pt
+# *.onnx
 
 # Logs
 *.log
