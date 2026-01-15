@@ -4,7 +4,6 @@ A comprehensive Federated Learning system designed to detect adversarial attacks
 
 ## 📋 Table of Contents
 
-- [Architecture](#-architecture)
 - [Key Features](#-key-features)
 - [Prerequisites](#-prerequisites)
 - [Project Structure](#-project-structure)
@@ -16,18 +15,6 @@ A comprehensive Federated Learning system designed to detect adversarial attacks
 - [Configuration](#%EF%B8%8F-configuration)
 - [Results](#-expected-results)
 
-## 🏗️ Architecture
-
-The system implements a robust pipeline ensuring data integrity before federated aggregation:
-
-```mermaid
-graph TD
-    A[Hospitals (N Datasets)] --> B[Poison Detection (Autoencoder)]
-    B -->|Clean Data| C[Federated Learning (FedAvg)]
-    B -->|Poisoned Data| D[Discarded]
-    C --> E[Global Model (EfficientNetV2)]
-    E --> F[Deployment (API + Frontend)]
-```
 
 ### Components:
 1.  **Multi-Source Simulation**: Simulates N hospitals (default: 4) with independent datasets.
@@ -46,7 +33,7 @@ graph TD
 ## 🔧 Prerequisites
 
 *   **OS**: Windows 10/11 (Optimized for)
-*   **Hardware**: GPU recommended (Tested on RTX 4060 8GB).
+*   **Hardware**: GPU recommended (Tested on RTX 3060 6GB)
 *   **Python**: 3.8+
 *   **Node.js**: 16+ (For the frontend)
 *   **Kaggle Account**: To download the Chest X-Ray dataset.
@@ -76,8 +63,8 @@ project/
 
 ### 1. Clone the repository
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/Eljihad404/adv-attack-detection
+cd adv-attack-detection
 ```
 
 ### 2. Backend Setup
@@ -127,9 +114,8 @@ Start the full stack application (Backend + Frontend).
 
 **Terminal 1 (Backend):**
 ```bash
-python api/server.py
+uvicorn api.server:app 
 ```
-*Server runs at `http://localhost:8000`*
 
 **Terminal 2 (Frontend):**
 ```bash
@@ -166,11 +152,8 @@ DETECTION_THRESHOLD = 0.018  # Reconstruction error threshold
 
 *   **Global Model Accuracy**: Aiming for >85% on clean test data.
 *   **Detector Efficiency**: Should filter out >80% of adversarial samples while keeping False Positives low.
-*   **Files**: Training generates `global_model_final.pth` (~80MB) and `poison_detector.pth`.
+*   **Files**: Training generates `global_model_final.pth` and`poison_detector.pth`.
 
-## 🤝 Contribution
-
-Contributions are welcome! Please fork the repository and submit a Pull Request.
 
 ## 📄 License
 
